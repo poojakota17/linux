@@ -37,7 +37,7 @@
       $ sudo apt-get install make
       $ sudo apt install gcc
       ```
-  * Compiled the **cmpe283-1.c** file.
+  * Compiled the **cmpe283-1.c** file. Run the below command from `linux/kernel/cmpe283-assignment1/` directory.
     * ```
       $ make
         make -C /lib/modules/5.4.0-52-generic/build M=/home/pooja/cmpe283_assignment/linux/kernel/cmpe283-assignment1 modules
