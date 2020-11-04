@@ -137,7 +137,7 @@ Linux anastasia-nested-vm 5.8.0-1008-gcp #8-Ubuntu SMP Thu Oct 15 12:48:27 UTC 2
  - The main goal of the assigment was to calculate exits from the VM and time spent processing them in the VMM. \
 To calculate exits we need to assecc some data structure to hold exits in vmx.c , update it everytime when the exit occurs (vmx_handle_exit function) and then put in into %eax register while emulating cpuid (kvm_emulate_cpuid function in cpuid.c ). One of the ways to it is to use atomic variable. 
  - In order to do that `atomic_t total_exits` was added to cpuid.c. To make it visible in vmx.c EXPORT_SYMBOL_GPL(total_exits) was used.
- - Every time the exit occured run `atomic_inc(&total_exits)` in vmx_handle_exit in vmx.c
+ - On each entry to vmx_handle_exit in vmx.c total_exits were updated `atomic_inc(&total_exits)`
   
 ### **Question 2**:
 
