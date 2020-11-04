@@ -59,14 +59,21 @@ Linux kernel
 * Downloaded ISO iamge of Ubuntu 18.04 64 bit.
 *  Installed inner VM(with 2 VCPU and 20 GB disk space) through virtual machine manager using the ISO image.
   
-#### After seting up the environment analysed linux/arch/x86/kvm/vmx/vmx.c and linux/arch/x86/kvm/cpuid.c
-*   Analysed the exit handling function, vmx_handle_exit(vmx.c) and exit handler function for cpuid, kvm_emulate_cpuid(cpuid.c).
-* Tried to understand where to place the code for new leaf function(0x4FFFFFFF). 
-* Studied about atomic variables.
-* Analysed their operations like addition  and increment operation of those variables in atomic.h file.
-* Studied about EXPORT_SYMBOL and EXPORT_SYMBOL_GPL to use variables between 2 files(vmx.c and cpuid.c).
-* Implemented the 
+#### After seting up the environment:
 
+* Research
+  * Analysed linux/arch/x86/kvm/vmx/vmx.c and linux/arch/x86/kvm/cpuid.c 
+  *   Analysed the exit handling function, vmx_handle_exit(vmx.c) and exit handler function for cpuid, kvm_emulate_cpuid(cpuid.c).
+  * Tried to understand where to place the code for new leaf function(0x4FFFFFFF). 
+  * Studied about atomic variables.
+  * Analysed their operations like addition  and increment operation of those variables in atomic.h file.
+  * Studied about EXPORT_SYMBOL and EXPORT_SYMBOL_GPL to use variables between 2 files (vmx.c and cpuid.c).
+* Implementation
+  * Created a atomic64_t type variable total_time to record processor cycles for all exits in cpuid.c and exported to be used in vmx.c 
+  * Then in vmx.c, I calculated the initial time stamp counter using rdtsc() and assigned it to processing_time_start whenever an exit happen. On completing the exit handler again rdtsc() is used to determine exit handling end time and assigned to processing_time_end and their difference is added to the total_time for all exits. 
+  
+  * From the 64 bit total_time, I took the high 32 bits using right shift operator with 32 and low 32 bits with bitwise AND with 0xffffffff and assigned it to EBX and ECX registers if CPUID new leaf function(0x4FFFFFFF) is called.
+  
 ### **Question 2**:
 
 * We put a new CPUID leaf function in
