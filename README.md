@@ -15,7 +15,7 @@ Linux kernel
 * *Pooja Prasannan* 
 
 ### **Question 1**: 
-## (Work by Pooja Prasannan)
+## Work by Pooja Prasannan
 
 * Scenario 1 setup with host OS as linux(Ubuntu 20.04).
 * Checked if vmx is available.
@@ -74,7 +74,7 @@ Linux kernel
   * Then in vmx.c, I calculated the initial time stamp counter using rdtsc() and assigned it to processing_time_start whenever an exit happen. On completing the exit handler again rdtsc() is used to determine exit handling end time and assigned to processing_time_end and their difference is added to the total_time for all exits. 
   * From the 64 bit total_time, I took the high 32 bits using right shift operator with 32 and low 32 bits with bitwise AND with 0xffffffff and assigned it to EBX and ECX registers if CPUID new leaf function(0x4FFFFFFF) is called.
 * Testing
-  * I did the testing part for total_time and checked its values in EBX and ECX by putting 0x4FFFFFFF in EAX(Calling CPUID leaf function 0x4FFFFFFF. 
+  * I did the testing part for total_time in guest VM and checked its values in EBX and ECX by putting 0x4FFFFFFF in EAX(Calling CPUID leaf function 0x4FFFFFFF. 
   
 
 ## Work by Anastasia Zimina
@@ -133,12 +133,12 @@ Linux anastasia-nested-vm 5.8.0-1008-gcp #8-Ubuntu SMP Thu Oct 15 12:48:27 UTC 2
 7. Verify that the kernel is updated: `uname -a` \ 
  ( output should  look like: `Linux anastasia-nested-vm 5.10.0-rc2+ #4 SMP Wed Nov 4 01:56:19 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux`)
 
-### Research & Implementation
+### Research, Implementation and Testing
  - The main goal of the assigment was to calculate exits from the VM and time spent processing them in the VMM. \
 To calculate exits we need to assecc some data structure to hold exits in vmx.c , update it everytime when the exit occurs (vmx_handle_exit function) and then put in into %eax register while emulating cpuid (kvm_emulate_cpuid function in cpuid.c ). One of the ways to it is to use atomic variable. 
  - In order to do that `atomic_t total_exits` was added to cpuid.c. To make it visible in vmx.c EXPORT_SYMBOL_GPL(total_exits) was used.
  - On each entry to vmx_handle_exit in vmx.c total_exits were updated `atomic_inc(&total_exits)`
- - To test the work small testfile in c was used in guest vm. 
+ - Tested using C, total exits in guest VM by calling CPUID leaf function (0x4FFFFFFF).
   
 ### **Question 2**:
 
