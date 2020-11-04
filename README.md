@@ -71,7 +71,6 @@ Linux kernel
 * Implementation
   * Created a atomic64_t type variable total_time to record processor cycles for all exits in cpuid.c and exported to be used in vmx.c 
   * Then in vmx.c, I calculated the initial time stamp counter using rdtsc() and assigned it to processing_time_start whenever an exit happen. On completing the exit handler again rdtsc() is used to determine exit handling end time and assigned to processing_time_end and their difference is added to the total_time for all exits. 
-  
   * From the 64 bit total_time, I took the high 32 bits using right shift operator with 32 and low 32 bits with bitwise AND with 0xffffffff and assigned it to EBX and ECX registers if CPUID new leaf function(0x4FFFFFFF) is called.
   
 ### **Question 2**:
