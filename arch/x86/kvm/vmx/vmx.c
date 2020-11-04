@@ -28,6 +28,7 @@
 #include <linux/tboot.h>
 #include <linux/trace_events.h>
 #include <linux/entry-kvm.h>
+// #include <linux/atomic.h>
 
 #include <asm/apic.h>
 #include <asm/asm.h>
@@ -47,6 +48,8 @@
 #include <asm/spec-ctrl.h>
 #include <asm/virtext.h>
 #include <asm/vmx.h>
+// #include <asm/atomic.h>
+
 
 #include "capabilities.h"
 #include "cpuid.h"
@@ -222,6 +225,9 @@ static const struct {
 
 #define L1D_CACHE_ORDER 4
 static void *vmx_l1d_flush_pages;
+uint64_t processing_time_start, processing_time_end;
+extern atomic_t total_exits ; 
+extern atomic64_t total_time ;
 
 static int vmx_setup_l1d_flush(enum vmx_l1d_flush_state l1tf)
 {
@@ -5931,7 +5937,10 @@ static int vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 	struct vcpu_vmx *vmx = to_vmx(vcpu);
 	u32 exit_reason = vmx->exit_reason;
 	u32 vectoring_info = vmx->idt_vectoring_info;
+	int result;
+	atomic_inc(&total_exits); // incrementing exit counter on each exit.
 
+	processing_time_start=rdtsc(); // getting initial timestamp counter when exit is getting handled.
 	/*
 	 * Flush logged GPAs PML buffer, this will make dirty_bitmap more
 	 * updated. Another good is, in kvm_vm_ioctl_get_dirty_log, before
@@ -6045,17 +6054,52 @@ static int vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 		goto unexpected_vmexit;
 #ifdef CONFIG_RETPOLINE
 	if (exit_reason == EXIT_REASON_MSR_WRITE)
-		return kvm_emulate_wrmsr(vcpu);
+	{
+		result = kvm_emulate_wrmsr(vcpu);
+		processing_time_end = rdtsc();
+		atomic64_add(processing_time_end - processing_time_start,&total_time);
+		return result;
+	}
+		
 	else if (exit_reason == EXIT_REASON_PREEMPTION_TIMER)
-		return handle_preemption_timer(vcpu);
+
+		{
+			result = handle_preemption_timer(vcpu);
+			processing_time_end = rdtsc();
+			atomic64_add(processing_time_end - processing_time_start,&total_time);
+			return result;
+		}
 	else if (exit_reason == EXIT_REASON_INTERRUPT_WINDOW)
-		return handle_interrupt_window(vcpu);
+		{
+			result = handle_interrupt_window(vcpu);
+			processing_time_end = rdtsc();
+			atomic64_add(processing_time_end -processing_time_start, &total_time);
+			return result;
+
+		}
 	else if (exit_reason == EXIT_REASON_EXTERNAL_INTERRUPT)
-		return handle_external_interrupt(vcpu);
+		{
+			
+			result = handle_external_interrupt(vcpu);
+			processing_time_end = rdtsc();
+			atomic64_add(processing_time_end -processing_time_start, &total_time);
+			return result;
+		}
 	else if (exit_reason == EXIT_REASON_HLT)
-		return kvm_emulate_halt(vcpu);
+		{
+			result = kvm_emulate_halt(vcpu);
+			processing_time_end = rdtsc();
+			atomic64_add(processing_time_end - processing_time_start, &total_time);
+			return result;
+		}
 	else if (exit_reason == EXIT_REASON_EPT_MISCONFIG)
-		return handle_ept_misconfig(vcpu);
+		 
+		{
+			result = handle_ept_misconfig(vcpu);
+			processing_time_end = rdtsc();
+			atomic64_add(processing_time_end - processing_time_start, &total_time);
+			return result;
+		}
 #endif
 
 	exit_reason = array_index_nospec(exit_reason,
@@ -6063,8 +6107,14 @@ static int vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 	if (!kvm_vmx_exit_handlers[exit_reason])
 		goto unexpected_vmexit;
 
-	return kvm_vmx_exit_handlers[exit_reason](vcpu);
-
+	
+	result=kvm_vmx_exit_handlers[exit_reason](vcpu);
+	processing_time_end= rdtsc(); // getting time stamp counter after exit is handled.
+	
+	atomic64_add(processing_time_end-processing_time_start,&total_time); // adding each exit handling time to total time for all exit.
+	// get_totalexit(&total_exits);
+	// get_totaltime(&total_time);  
+	return result;
 unexpected_vmexit:
 	vcpu_unimpl(vcpu, "vmx: unexpected exit reason 0x%x\n", exit_reason);
 	dump_vmcs();
@@ -6076,7 +6126,8 @@ unexpected_vmexit:
 	vcpu->run->internal.data[1] = vcpu->arch.last_vmentry_cpu;
 	return 0;
 }
-
+// EXPORT_SYMBOL_GPL(total_time);
+// EXPORT_SYMBOL_GPL(total_exits);
 /*
  * Software based L1D cache flush which is used when microcode providing
  * the cache control MSR is not loaded.
@@ -8023,4 +8074,5 @@ static int __init vmx_init(void)
 
 	return 0;
 }
+
 module_init(vmx_init);
