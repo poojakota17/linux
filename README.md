@@ -181,7 +181,7 @@ CPUID(0x4FFFFFFF)   Total Exits= 4638819	 Total cycles= 19271846126
 
 ### **Question 3**:
 
-* Yes the exits increase at a stable rate if nothing is done on the test VM and the test file is executed again and again at fixed intervals. But if we execute diferent type of instruction or commands in the test VM, the exits are different and change at a different rate. Yes there are more exits for some instruction like for eg: reboot takes a different amount of exits compared to cpuid.
+* Yes the exits increase at a stable rate if nothing is done on the test VM and the test file is executed again and again at fixed intervals. But if we execute different type of instruction or commands in the test VM, the exits are different and change at a different rate. Yes there are more exits for some instruction like for eg: reboot takes a different amount of exits compared to cpuid.
 * A full VM reboot takes approximately 10,000 -15,000 exits.
 
 Resources:
