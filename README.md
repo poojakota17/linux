@@ -40,7 +40,7 @@ Linux kernel
       $ sudo bash
       # apt-get install build-essential kernel-package fakeroot libncurses5-dev libssl-dev ccache bison flex libelf-dev 
       # uname -a
-        $ Linux pooja 5.4.0-52-generic  #57-Ubuntu SMP Thu Oct 15 10:57:00 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux
+        # Linux pooja 5.4.0-52-generic  #57-Ubuntu SMP Thu Oct 15 10:57:00 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux
       # cp /boot/config-5.4.0-52-generic     ./.config  
       # make oldconfig
       # make -j 4 && make modules -j 4 && make install -j 4 && make modules_install -j 4
@@ -72,6 +72,8 @@ Linux kernel
   * Created a atomic64_t type variable total_time to record processor cycles for all exits in cpuid.c and exported to be used in vmx.c 
   * Then in vmx.c, I calculated the initial time stamp counter using rdtsc() and assigned it to processing_time_start whenever an exit happen. On completing the exit handler again rdtsc() is used to determine exit handling end time and assigned to processing_time_end and their difference is added to the total_time for all exits. 
   * From the 64 bit total_time, I took the high 32 bits using right shift operator with 32 and low 32 bits with bitwise AND with 0xffffffff and assigned it to EBX and ECX registers if CPUID new leaf function(0x4FFFFFFF) is called.
+* Testing
+  * I did the testing part for total_time and checked its values in EBX and ECX by putting 0x4FFFFFFF in EAX(Calling CPUID leaf function 0x4FFFFFFF. 
   
 ### **Question 2**:
 
