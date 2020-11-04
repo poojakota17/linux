@@ -3,7 +3,8 @@ Linux kernel
 #  **Assignment 1**
 ============
 
-https://github.com/poojakota17/linux/tree/master/kernel/cmpe283-assignment1
+* https://github.com/poojakota17/linux/tree/master/kernel/cmpe283-assignment1
+* Readme : https://github.com/poojakota17/linux/blob/master/kernel/cmpe283-assignment1/README.md
 
 
 #  **Assignment 2**
