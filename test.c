@@ -5,11 +5,11 @@
 
 int main()
 {
-  __uint64_t a = 0x4FFFFFFF;
+  __uint64_t a = 0x4FFFFFFE;
   __uint64_t b, c, d;
   int i;
   for (i = 0; i < 66; i++) {
-      __asm__ __volatile__("mov $0x4FFFFFFF, %eax\n\t");
+      __asm__ __volatile__("mov $0x4FFFFFFE, %eax\n\t");
     if (i == 0) { __asm__ __volatile__("mov $0, %ecx\n\t"); }
     else if (i == 1) {  __asm__ __volatile__("mov $1, %ecx\n\t"); }
     else if (i == 2) {  __asm__ __volatile__("mov $2, %ecx\n\t"); }
@@ -76,6 +76,9 @@ int main()
     else if (i == 63) { __asm__ __volatile__("mov $63, %ecx\n\t"); }
     else if (i == 64) {__asm__ __volatile__("mov $64, %ecx\n\t"); }
     else if (i == 65) { __asm__ __volatile__("mov $65, %ecx\n\t"); }
+    else if (i == 66) { __asm__ __volatile__("mov $66, %ecx\n\t"); }
+    else if (i == 67) { __asm__ __volatile__("mov $67, %ecx\n\t"); }
+    else if (i == 68) { __asm__ __volatile__("mov $68, %ecx\n\t"); }
     __asm__ __volatile__("cpuid"
                    :"=a"(a), "=b"(b), "=c"(c), "=d"(d)
                    );
