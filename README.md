@@ -132,6 +132,27 @@ Linux anastasia-nested-vm 5.8.0-1008-gcp #8-Ubuntu SMP Thu Oct 15 12:48:27 UTC 2
   * reboot
 7. Verify that the kernel is updated: `uname -a` \ 
  ( output should  look like: `Linux anastasia-nested-vm 5.10.0-rc2+ #4 SMP Wed Nov 4 01:56:19 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux`)
+8. Update the VM instance and install some necessary packages to run nested VM and download Ubuntu image for the nested VM
+```
+sudo apt-get install virt-manager 
+wget http://releases.ubuntu.com/20.04/ubuntu-20.04.1-desktop-amd64.iso
+sudo virt-install --name zimavm --ram 1024 --disk path=/var/lib/libvirt/images/zimavm.img,size=8 --vcpus 1 --virt-type kvm --os-type l
+inux --os-variant ubuntu18.04 --graphics none --location 'http://archive.ubuntu.com/ubuntu/dists/bionic/main/installer-amd64/' --extra-args "console=tty0 console=ttyS0,115200n8"
+```
+While installation make sure to choose OpenSSH when it prompts for additional software to install.
+9. VMs manipulations:
+```
+sudo virsh list --all // list all VMs
+sudo virsh start [nameOfVM] // start the VM with the specified name
+sudo virsh destroy [nameOfVM] //stop the VM with the specified name
+sudo virsh undefine [nameOfVm] // delete VM
+sudo virsh domifaddr [nameOfVM] // get address/port to connect to the vm
+```
+10. Check that host can ping nested vm
+```
+sudo ping -c 2 [nameOfVM]
+
+```
 
 ### Research, Implementation and Testing
  - The main goal of the assigment was to calculate exits from the VM and time spent processing them in the VMM. \
@@ -140,7 +161,7 @@ To calculate exits we need to assecc some data structure to hold exits in vmx.c 
  - On each entry to vmx_handle_exit in vmx.c total_exits were updated `atomic_inc(&total_exits)`
  - Tested using C, total exits in guest VM by calling CPUID leaf function (0x4FFFFFFF).
   
-### **Question 2**:
+## **Question 2**:
 
 * We put a new CPUID leaf function in
 kvm_emulate_cpuid function : 
@@ -179,7 +200,7 @@ CPUID(0x4FFFFFFF)   Total Exits= 4638819	 Total cycles= 19271846126
     [17326.920748] 2091976942
   ```
 
-### **Question 3**:
+## **Question 3**:
 
 * Yes the exits increase at a stable rate if nothing is done on the test VM and the test file is executed again and again at fixed intervals. But if we execute different type of instruction or commands in the test VM, the exits are different and change at a different rate. Yes there are more exits for some instruction like for eg: reboot takes a different amount of exits compared to cpuid.
 * A full VM reboot takes approximately 10,000 -15,000 exits.
