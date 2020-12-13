@@ -82,7 +82,7 @@ int main()
     __asm__ __volatile__("cpuid"
                    :"=a"(a), "=b"(b), "=c"(c), "=d"(d)
                    );
-    printf("CPUID(0x4FFFFFFF)   Exits for exit = %d = %ld\t\n",i, a);
+    printf("CPUID(0x4FFFFFFE)   Exits for exit = %d = %ld\t\n",i, a);
   }
   return 0;
 }
