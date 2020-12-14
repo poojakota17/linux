@@ -222,6 +222,9 @@ Resources:
 ## (Work by Pooja Prasannan)
 Analysed how to increment total exits for each exit in vmx.c (vmx_handle_exit). Found how to use an atomic integer array and its intitialization to increment for each exit reason individually. Analysed where to place it in the vmx.c and how to access it in cpuid.c using export_smbol_gpl and extern. For implementation added a cpuid leaf function 0x4ffffffe to check for exits supported in kvm and sdm and assignned values to eac,ebx,ecx and edx correspondingly. 
 
+## (Work by Anastasia Zimina)
+We both worked separatly in different enviroments untill the first results. So I also updated cpuid.c to add conditions for checking the leaf, and ecx register (input for the exit reason from user), and an array of attomics to store exit results. Updated vmx.c to increment element in the exits array corresponding to the current exit reason.
+
 ### **Question 2**: 
 Implementaion:
 
@@ -239,6 +242,27 @@ Once editing the code :
   # reboot
 
 ```
+After reboot in no gui gcloud enviroment
+```
+/* IN VMM */
+ sudo bash 
+ sudo virsh list --all //list all awailable inner VMs
+ sudo virsh start [nameOfVM] //start inner VM
+ sudo ssh [user]@[nameOfVM]
+ 
+/* IN VM */
+ gcc test.c // compile test file
+ ./a.out > some.txt
+ exit // go back to VMM
+ 
+ /* IN VMM */
+ sudo bash
+ sudo dmesg
+ sudo virsh destroy [nameOfVM] // stop inner VM
+```
+
+
+
 #### **Output**
   
 Below is a sample output for exit reasons from 28 to 35. Since 35 is not implemented so it have integer value of 0xffffffff:
@@ -263,6 +287,26 @@ CPUID(0x4FFFFFFE) Exit for exit_reason 28 = 28216	        edx= 0
 ### **Question 4**
 Some exits are more frequent like exit reasons 48, 49, 30, 32, 52, 12.
 Some exits are less frequent like exit reasons 54, 55, 47, 46, 44, 29.
+
+In the gcloud enviroment are I/0 and CPUID
+ The most common:
+  - 30(I/O): 168K
+  - 10(CPUID): 71K
+  - 28(control-register access): 25K
+ 
+ 
+ - 0(Exceptions): 16K
+ - 49(EPT misconfiguration): 12K
+ - 48(EPT violation): 8K
+ - 32(WRMSR): 5K
+ - 1(External interrupt): 4K
+ - 12(HLT): 2K
+ - 7(Interrupt window): 1K
+
+ The least:
+ - 31(RDMSR): 0.2K 
+ - 44(APIC access): 11
+ - 29(MOV DR): 1
 
 #  **Assignment 4**
 ============
