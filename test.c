@@ -8,7 +8,7 @@ int main()
   __uint64_t a = 0x4FFFFFFE;
   __uint64_t b, c, d;
   int i;
-  for (i = 0; i < 66; i++) {
+  for (i = 0; i < 69; i++) {
       __asm__ __volatile__("mov $0x4FFFFFFE, %eax\n\t");
     if (i == 0) { __asm__ __volatile__("mov $0, %ecx\n\t"); }
     else if (i == 1) {  __asm__ __volatile__("mov $1, %ecx\n\t"); }
