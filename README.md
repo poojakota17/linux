@@ -273,6 +273,9 @@ Some exits are less frequent like exit reasons 54, 55, 47, 46, 44, 29.
 
 ### **Question 1**: 
 ## (Work by Pooja Prasannan)
+Studied about nested and shadow paging, their exit differences.
+Updated documentation
+
 After shutting down inner vm, did 
   ```
     cd /lib/modules/5.9.0+/kernel/arch/x86/kvm
