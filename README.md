@@ -285,7 +285,7 @@ CPUID(0x4FFFFFFE) Exit for exit_reason 28 = 28216	        edx= 0
 
   ```
 ### Question 3
-About 90k to 1,30,000 exits  happen on reboot. Also exits changes according to operations done. Else it increases at a stable rate if no work done. 
+About 90k to 1,30,000 exits  happen on VM reboot. Also exits changes according to operations done like more on cpuid. Else it increases at a stable rate if no work done. 
 
 ### **Question 4**
 Some exits are more frequent like exit reasons 48, 49, 30, 32, 52, 12.
