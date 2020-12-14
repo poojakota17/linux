@@ -376,7 +376,7 @@ CPUID(0x4FFFFFFE) Exit for exit_reason 28 = 15928	 ebx= 0	 ecx= 28	 edx= 0
 
   Between the two runs there was a significant increase in number of exits because the number of exits to be handled in shadow paging is more compared to nested paging. In Nested Paging EPT violation is the exit to be handled whereas in shadow paging there are multiple. 
   
-  **Observation in gCloud enviroment:** 
+  **Observation in gCloud enviroment:**  \
   While trying to disable nested paging first 5 attempts ended in lost commection to the VMM. 
   ```
   rmmod kvm-intel
