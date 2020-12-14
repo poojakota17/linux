@@ -31,9 +31,11 @@
 u32 kvm_cpu_caps[NCAPINTS] __read_mostly;
 EXPORT_SYMBOL_GPL(kvm_cpu_caps);
 atomic_t total_exits;
+atomic_t exit_each_exitreason[69] = {0};
 atomic64_t total_time;
 EXPORT_SYMBOL_GPL(total_exits);
 EXPORT_SYMBOL_GPL(total_time);
+EXPORT_SYMBOL_GPL(exit_each_exitreason);
 
 static u32 xstate_required_size(u64 xstate_bv, bool compacted)
 {
@@ -1134,26 +1136,50 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 		ebx = (atomic64_read(&total_time) >> 32); //(high 32 bit)
 		ecx = (atomic64_read(&total_time) & 0xffffffff); //(low 32 bit)
 		printk(KERN_INFO "HELLO WORLD FROM 0x4fffffff leaf");
-		printk(KERN_INFO "Total time");
-		printk("%lld", atomic64_read(&total_time));
+		// printk(KERN_INFO "Total time");
+		// printk("%lld", atomic64_read(&total_time));
 		printk(KERN_INFO "Total exits");
 		printk("%d", atomic_read(&total_exits));
-		printk(KERN_INFO "High 32 bits of total cycles in ebx");
-		printk("%lld", (atomic64_read(&total_time) >> 32));
-		printk(KERN_INFO "low 32 bits of total cycles in ecx");
-		printk("%lld",(atomic64_read(&total_time) & 0xffffffff));
+		// printk(KERN_INFO "High 32 bits of total cycles in ebx");
+		// printk("%lld", (atomic64_read(&total_time) >> 32));
+		// printk(KERN_INFO "low 32 bits of total cycles in ecx");
+		// printk("%lld",(atomic64_read(&total_time) & 0xffffffff));
 
 		//printk("\n %d", total_exits);
+	} else if (eax == 0x4ffffffe && ecx >= 0 && ecx <= 68 && ecx != 35 && ecx != 38 && ecx != 42 && ecx != 65) {
+		printk(KERN_INFO "ecx value");
+		printk("%u", ecx);
+		if (atomic_read(&exit_each_exitreason[ecx]) ==0){
+			eax =0;
+			ebx =0;
+			ecx =0;
+			edx = 0;
+			// //printk(KERN_INFO "eax and edx when exit happened but not enabled");
+			// printk("%u", eax);
+			// printk("%u", edx);
+		} else{
+			eax =(atomic_read(&exit_each_exitreason[ecx]));
+			ebx = 0;
+			ecx= 0;
+			edx= 0;
+			// printk(KERN_INFO "eax when exit happened");
+			// printk("%u", eax);
+		}
+	} else if (eax == 0x4ffffffe && (ecx > 68 || ecx == 35 || ecx == 38 || ecx == 42 || ecx == 65)) {
+		eax = 0;
+		ebx = 0;
+		ecx = 0;
+		edx = 0xFFFFFFFF;
+		// printk(KERN_INFO "eax and edx when exit happened but not impleented in sdm");
+		// printk("%u", eax);
+		// printk("%u", edx);
+	} else {
+		// printk("%lld", atomic64_read(&total_time));
+		// printk("%d", atomic_read(&total_exits));
+		kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
 	}
-	else{
 
-	// printk("%lld", atomic64_read(&total_time));
-	// printk("%d", atomic_read(&total_exits));
-	kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
-	}
-	
-	
-	printk(KERN_INFO "HELLO WORLD");
+	//printk(KERN_INFO "HELLO WORLD");
 
 	kvm_rax_write(vcpu, eax);
 	kvm_rbx_write(vcpu, ebx);

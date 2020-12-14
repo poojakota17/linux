@@ -228,7 +228,7 @@ static void *vmx_l1d_flush_pages;
 uint64_t processing_time_start, processing_time_end;
 extern atomic_t total_exits ; 
 extern atomic64_t total_time ;
-
+extern atomic_t exit_each_exitreason[69];
 static int vmx_setup_l1d_flush(enum vmx_l1d_flush_state l1tf)
 {
 	struct page *page;
@@ -5939,8 +5939,13 @@ static int vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 	u32 vectoring_info = vmx->idt_vectoring_info;
 	int result;
 	atomic_inc(&total_exits); // incrementing exit counter on each exit.
+	atomic_inc(&exit_each_exitreason[(int)exit_reason]);
+	// printk(KERN_INFO "exitreason number");
+	// printk("%u", exit_reason);
+	
 
-	processing_time_start=rdtsc(); // getting initial timestamp counter when exit is getting handled.
+		processing_time_start =
+			rdtsc(); // getting initial timestamp counter when exit is getting handled.
 	/*
 	 * Flush logged GPAs PML buffer, this will make dirty_bitmap more
 	 * updated. Another good is, in kvm_vm_ioctl_get_dirty_log, before

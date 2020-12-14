@@ -211,6 +211,115 @@ Resources:
   - [Atomic variables in C](https://www.kernel.org/doc/Documentation/atomic_t.txt)
 
 
+#  **Assignment 3**
+============
+
+## **Team members**:
+* *Anastasia Zimina*
+* *Pooja Prasannan* 
+
+### **Question 1**: 
+## (Work by Pooja Prasannan)
+Analysed how to increment total exits for each exit in vmx.c (vmx_handle_exit). Found how to use an atomic integer array and its intitialization to increment for each exit reason individually. Analysed where to place it in the vmx.c and how to access it in cpuid.c using export_smbol_gpl and extern. For implementation added a cpuid leaf function 0x4ffffffe to check for exits supported in kvm and sdm and assignned values to eac,ebx,ecx and edx correspondingly. 
+
+### **Question 2**: 
+Implementaion:
+
+On top of assignment 2, we created a new cpuid leaf function for 0x4ffffffe to get total exits for each exit reason in ecx.
+For exit-reason from 0-68(except 35,38,42 and 65) implemented in SDM , if that particular exit is enabled in kvm then eax will have total exit. If its not enabled then, all 4 registers will have 0. If its outside a value not implemented in sdm, then eax, ebx,ecx will have zero and edx will have 0xffffffff. 
+
+We have created an array of size 69 and is incrementing it in vmx_handle_exit in vmx.c. In cpuid exit handler, we are reading this array according to the input in ecx and if its outside the range or amongst exit number 35,38,42 and 65 then edx will have 0xfffffff and other 3 registers will have value 0. If its in the range and exit has occured then values will be reflected in eax else it will be 0 if its not enabled.
+
+**Compilation and build**
+Once editing the code :
+```
+  cd linux
+  # sudo bash
+  # make -j 4 && make modules -j 4 && make install -j 4 and make modules_install -j 4
+  # reboot
+
+```
+#### **Output**
+  
+Below is a sample output for exit reasons from 28 to 35. Since 35 is not implemented so it have integer value of 0xffffffff:
+  ```
+CPUID(0x4FFFFFFE) Exit for exit_reason 35 = 0	            edx= 4294967295	
+
+CPUID(0x4FFFFFFE) Exit for exit_reason 34 = 0	            edx= 0	
+
+CPUID(0x4FFFFFFE) Exit for exit_reason 33 = 0	            edx= 0	
+
+CPUID(0x4FFFFFFE) Exit for exit_reason 32 = 114122	      edx= 0	
+
+CPUID(0x4FFFFFFE) Exit for exit_reason 31 = 7963	        edx= 0	
+
+CPUID(0x4FFFFFFE) Exit for exit_reason 30 = 266998	      edx= 0	
+
+CPUID(0x4FFFFFFE) Exit for exit_reason 29 = 2	            edx= 0
+
+CPUID(0x4FFFFFFE) Exit for exit_reason 28 = 28216	        edx= 0 	
+  ```
+
+### **Question 4**
+Some exits are more frequent like exit reasons 48, 49, 30, 32, 52, 12.
+Some exits are less frequent like exit reasons 54, 55, 47, 46, 44, 29.
+
+#  **Assignment 4**
+============
+
+## **Team members**:
+* *Anastasia Zimina*
+* *Pooja Prasannan* 
+
+### **Question 1**: 
+## (Work by Pooja Prasannan)
+After shutting down inner vm, did 
+  ```
+    cd /lib/modules/5.9.0+/kernel/arch/x86/kvm
+    sudo bash
+    rmmod kvm-intel
+    insmod kvm-intel.ko ept = 0
+  ```
+  
+  Analysed the changes in exits before and after ept modification.
+### **Question 2**
+  **Output**
+
+  When Nested Paging is on.
+  ```
+      dmesg
+     [ 1582.452307] Total exits
+     [ 1582.452310] 1898228
+  ```
+  ```
+  CPUID(0x4FFFFFFE) Exit for exit_reason 32 = 31776	 ebx= 0	 ecx= 32	 edx= 0	
+CPUID(0x4FFFFFFE) Exit for exit_reason 31 = 833	     ebx= 0	 ecx= 31	 edx= 0
+CPUID(0x4FFFFFFE) Exit for exit_reason 30 = 1257204	 ebx= 0	 ecx= 30	 edx= 0	
+CPUID(0x4FFFFFFE) Exit for exit_reason 29 = 2	     ebx= 0	 ecx= 29	 edx= 0
+CPUID(0x4FFFFFFE) Exit for exit_reason 28 = 15928	 ebx= 0	 ecx= 28	 edx= 0	
+  ```
+
+  When Shadow Paging is on
+  ```
+     dmesg
+
+     [  569.454654] Total exits
+     [  569.454658] 3154271
+
+  ```
+  ```
+  CPUID(0x4FFFFFFE) Exit for exit_reason 32 = 119953	     ebx= 0	 ecx= 32	 edx= 0	
+  CPUID(0x4FFFFFFE) Exit for exit_reason 31 = 7853	     ebx= 0	 ecx= 31	 edx= 0	
+  CPUID(0x4FFFFFFE) Exit for exit_reason 30 = 1515431	     ebx= 0	 ecx= 30	 edx= 0	
+  CPUID(0x4FFFFFFE) Exit for exit_reason 29 = 4	         ebx= 0	 ecx= 29	 edx= 0
+  CPUID(0x4FFFFFFE) Exit for exit_reason 28 = 31586	     ebx= 0	 ecx= 28	 edx= 0
+  ```
   
 
+  ### **Question 3**
+     
+  Number of exits have been increased when nested paging is turned off. Yes this was an expected output as shadow paging requires more exits for its implementation like #PF, mov to CR3, mov from CR3, TLB flush exit etc.
 
+  ### **Question 4**
+
+  Between the two runs there was a significant increase in number of exits because the number of exits to be handled in shadow paging is more compared to nested paging. In Nested Paging EPT violation is the exit to be handled whereas in shadow paging there are multiple. 
