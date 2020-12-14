@@ -319,6 +319,10 @@ In the gcloud enviroment are I/0 and CPUID
 ## (Work by Pooja Prasannan)
 Studied about nested and shadow paging, their exit differences.
 
+## (Work by Anastasia Zimina)
+Studied about nested and shadow paging, their exit differences.
+Used the same approach in gcloud enviroment. 
+
 Updated documentation
 
 After shutting down inner vm, did 
@@ -371,3 +375,14 @@ CPUID(0x4FFFFFFE) Exit for exit_reason 28 = 15928	 ebx= 0	 ecx= 28	 edx= 0
   ### **Question 4**
 
   Between the two runs there was a significant increase in number of exits because the number of exits to be handled in shadow paging is more compared to nested paging. In Nested Paging EPT violation is the exit to be handled whereas in shadow paging there are multiple. 
+  
+  **Observation in gCloud enviroment:** 
+  While trying to disable nested paging first 5 attempts ended in lost commection to the VMM. 
+  ```
+  rmmod kvm-intel
+  insmod kvm-intel.ko ept = 0
+  virsh start [innerVM]
+  ssh [user]@[innerVM] => connection is lost
+  ```
+  During the last try connestion wasn't lost but the number of total exits didn't change. 
+  So my guess is that somehow gcloud doesn't allow disabling nested pages.
