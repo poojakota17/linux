@@ -374,7 +374,7 @@ CPUID(0x4FFFFFFE) Exit for exit_reason 28 = 15928	 ebx= 0	 ecx= 28	 edx= 0
 
   ### **Question 4**
 
-  Between the two runs there was a significant increase in number of exits because the number of exits to be handled in shadow paging is more compared to nested paging. In Nested Paging EPT violation is the exit to be handled whereas in shadow paging there are multiple. 
+  Between the two runs there was a significant increase in number of exits because the number of exits to be handled in shadow paging is more compared to nested paging. In Nested Paging EPT violation is the exit to be handled whereas in shadow paging there are multiple. This is because in shadow paging, hypervisor have to enable #PF exiting so that it can keep the shadow page table empty and do side by side walks with theexit guest vm percieved page table.It also needs to enable exit for mov to and from CR3 so that whenever a guest wants to read or write from/to CR3 , it gets its own managed pagetable. Also there are TLB flush exits so that hypevisor can keep the TLB updated as per guests managed page table. Also mov to CR4, INVLPG etc also cause TLB flushes which in turn cause exits. Thus shadow paging implementation is more complex than nested paging because of more exits.
   
   **Observation in gCloud enviroment:**  \
   While trying to disable nested paging first 5 attempts ended in lost commection to the VMM. 
